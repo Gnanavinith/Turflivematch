@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { config } from './config/env';
 import { connectDB } from './config/db';
@@ -30,11 +31,14 @@ app.use('/api/matches', matchRoutes);
 app.post('/api/reset', matchController.reset);
 app.post('/api/sync', matchController.sync);
 
-// Serve static frontend in production
-app.use(express.static(path.join(__dirname, '../client/dist')));
-app.get('*', (_req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-});
+// Serve static frontend in production (only if dist exists)
+const clientDistPath = path.join(__dirname, '../client/dist');
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
 
 // Connect to MongoDB and start server
 connectDB().then(() => {
