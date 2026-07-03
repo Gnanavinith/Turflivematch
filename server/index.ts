@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { config } from './config/env';
@@ -14,6 +15,10 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // Middleware
+app.use(cors({
+  origin: ['https://turflivescore.netlify.app', 'http://localhost:3000', 'http://localhost:4000'],
+  credentials: true
+}));
 app.use(express.json({ limit: '10mb' }));
 
 // API Routes
