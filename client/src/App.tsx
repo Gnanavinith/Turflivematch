@@ -1038,38 +1038,6 @@ export default function App() {
               );
             })}
           </div>
-
-          {/* Quick reset database footer control */}
-          <div className="max-w-md mx-auto flex justify-center mt-1 pt-1 border-t border-neutral-100">
-            {isResetConfirming ? (
-              <div className="flex items-center gap-2 text-[9px] font-extrabold tracking-wide uppercase text-red-600 animate-fadeIn">
-                <span>Reset All Data?</span>
-                <button
-                  onClick={() => {
-                    handleResetData();
-                    setIsResetConfirming(false);
-                  }}
-                  className="rounded bg-red-600 text-white px-2 py-0.5 hover:bg-red-700 transition"
-                >
-                  Yes
-                </button>
-                <button
-                  onClick={() => setIsResetConfirming(false)}
-                  className="rounded bg-neutral-200 text-neutral-600 px-2 py-0.5 hover:bg-neutral-300 transition"
-                >
-                  No
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setIsResetConfirming(true)}
-                className="inline-flex items-center gap-1 text-[9px] font-bold text-neutral-400 hover:text-red-500 transition"
-              >
-                <RefreshCw size={8} />
-                Reset Seed Data Defaults
-              </button>
-            )}
-          </div>
         </nav>
       )}
 
