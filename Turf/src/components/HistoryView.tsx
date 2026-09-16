@@ -1,6 +1,6 @@
 import React from 'react';
-import { Match } from '../../types';
-import { Calendar, Clock, Award, ChevronRight, Trash2, Trophy, Activity } from 'lucide-react';
+import { Match } from '../types';
+import { Calendar, Clock, Award, ChevronRight, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface HistoryViewProps {
@@ -67,7 +67,7 @@ export default function HistoryView({ matches, onViewDetails, isAdmin, onDeleteM
                       ? 'bg-amber-50 text-amber-800 border-amber-200/50'
                       : 'bg-emerald-50 text-emerald-800 border-emerald-200/50'
                   }`}>
-                    {m.matchType === 'tournament' ? (<><Trophy size={9} className="inline-flex -mt-0.5 mr-0.5" />Tournament: {m.tournamentName || 'Championship Series'}{getSeriesInfo(m)}</>) : (<><Activity size={9} className="inline-flex -mt-0.5 mr-0.5" />Single Match</>)}
+                    {m.matchType === 'tournament' ? `🏆 Tournament: ${m.tournamentName || 'Championship Series'}${getSeriesInfo(m)}` : '🏏 Single Match'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">

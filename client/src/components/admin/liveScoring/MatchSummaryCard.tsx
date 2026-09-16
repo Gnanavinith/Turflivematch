@@ -1,6 +1,6 @@
 import React from 'react';
 import { Match } from '../../../types';
-import { Award } from 'lucide-react';
+import { Award, Trophy } from 'lucide-react';
 import { getMatchWinnerId } from './helpers';
 
 interface MatchSummaryCardProps {
@@ -59,7 +59,7 @@ export default function MatchSummaryCard({ match, allMatches, isAdmin, onContinu
       {isTournament && (
         <div className="rounded-2xl border border-amber-200/60 bg-amber-50/40 p-4 space-y-2.5 text-left">
           <div className="flex items-center justify-between border-b border-amber-100 pb-1.5">
-            <span className="text-[10px] font-black uppercase tracking-wider text-amber-800">🏆 Series Standing</span>
+            <span className="text-[10px] font-black uppercase tracking-wider text-amber-800"><Trophy size={10} className="inline-flex -mt-0.5 mr-0.5" /> Series Standing</span>
             <span className="text-xs font-bold text-neutral-600">{standingText}</span>
           </div>
           <div className="space-y-1">

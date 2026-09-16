@@ -1,7 +1,7 @@
 import React from 'react';
-import { Player, Match } from '../../types';
-import { getPlayerStats, sr } from '../../utils/cricket';
-import { ChevronLeft, Activity, Users, Target, Zap, Gauge, CircleDot, Building2, Trophy, FileDown, CalendarDays } from 'lucide-react';
+import { Player, Match } from '../types';
+import { getPlayerStats, sr } from '../utils/cricket';
+import { ChevronLeft, Award, Activity, Shield, Users } from 'lucide-react';
 import { motion } from 'motion/react';
 import { jsPDF } from 'jspdf';
 
@@ -214,8 +214,7 @@ export default function PlayerProfileView({
 
   return (
     <div id="player-profile-view" className="space-y-5">
-
-      {/* Back + Download row */}
+      {/* Back Button & Download PDF Row */}
       <div className="flex items-center justify-between">
         <button
           onClick={onBack}
@@ -229,142 +228,97 @@ export default function PlayerProfileView({
           onClick={downloadPlayerPDF}
           className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition px-3.5 py-1.5 text-xs font-black text-white shadow-sm"
         >
-          <FileDown size={14} strokeWidth={2.8} />
-          Download PDF
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Download Stats PDF
         </button>
       </div>
 
-      {/* ── Profile Header Card ── */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0B1424] via-[#0F172A] to-[#0E2A24] px-5 py-8 text-white shadow-xl sm:px-6">
-        {/* emerald ambient glow */}
-        <div className="pointer-events-none absolute -top-20 -right-16 h-56 w-56 rounded-full bg-emerald-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-12 h-52 w-52 rounded-full bg-emerald-400/10 blur-3xl" />
+      {/* Main Profile Info Card */}
+      <div className="relative overflow-hidden rounded-3xl border border-neutral-200/80 bg-white p-6 shadow-xs text-center">
+        {/* Giant Jersey emblem */}
+        <div className="mx-auto flex h-16 w-16 flex-col items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
+          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600/60 leading-none">Jersey</span>
+          <span className="text-2xl font-black mt-1 leading-none">{player.jerseyNo || '#'}</span>
+        </div>
 
-        {/* dot-grid texture */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.06]"
-          style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)', backgroundSize: '20px 20px' }}
-        />
-
-        <div className="relative z-10">
-          <div className="flex items-start gap-5">
-            {/* Jersey emblem */}
-            <div className="flex h-16 w-16 flex-shrink-0 flex-col items-center justify-center rounded-2xl border border-emerald-400/25 bg-emerald-400/10 text-white">
-              <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-300/70 leading-none">#</span>
-              <span className="mt-1 text-2xl font-black leading-none font-mono">{player.jerseyNo || '—'}</span>
-            </div>
-
-            {/* Name / Role / Age */}
-            <div className="min-w-0 flex-1">
-              <h2 className="text-2xl font-black leading-tight text-white tracking-tight">
-                {player.name}
-              </h2>
-              <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/5 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-300">
-                  <Activity size={10} className="text-emerald-400" />
-                  {player.role}
-                </span>
-                {player.age && (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Age {player.age}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Quick summary strip */}
-          <div className="mt-5 grid grid-cols-4 gap-2 rounded-2xl bg-white/5 border border-white/10 p-3">
-            {[
-              { val: stats.matches, lbl: 'Matches' },
-              { val: stats.runs, lbl: 'Runs' },
-              { val: stats.wickets, lbl: 'Wickets' },
-              { val: stats.sr, lbl: 'S/R' },
-            ].map((s, i) => (
-              <div key={i} className="text-center">
-                <div className="font-mono text-lg font-black leading-none text-white">{s.val}</div>
-                <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-400">{s.lbl}</div>
-              </div>
-            ))}
-          </div>
+        <h2 className="mt-4 text-2xl font-black text-neutral-900 leading-tight">
+          {player.name}
+        </h2>
+        <div className="mt-1 flex items-center justify-center gap-2 text-xs text-neutral-400 font-semibold uppercase tracking-wider">
+          <span>{player.role}</span>
+          {player.age && (
+            <>
+              <span className="h-1.5 w-1.5 rounded-full bg-neutral-200"></span>
+              <span>Age {player.age}</span>
+            </>
+          )}
         </div>
       </div>
 
-      {/* ── Career Stats Bento ── */}
+      {/* Career Stats Bento Grid */}
       <div className="space-y-2">
         <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-400">Career Statistics</h3>
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-5">
           {[
-            { label: 'Matches',     val: stats.matches,  icon: Users,      tint: 'bg-slate-50',     text: 'text-slate-700' },
-            { label: 'Runs',        val: stats.runs,     icon: Activity,   tint: 'bg-emerald-50',   text: 'text-emerald-700' },
-            { label: 'Highest',     val: stats.hs,       icon: Target,     tint: 'bg-amber-50',     text: 'text-amber-700' },
-            { label: 'Average',     val: stats.avg,      icon: Gauge,      tint: 'bg-blue-50',      text: 'text-blue-700' },
-            { label: 'Strike Rate', val: stats.sr,       icon: Zap,        tint: 'bg-violet-50',    text: 'text-violet-700' },
-            { label: 'Wickets',     val: stats.wickets,  icon: CircleDot,  tint: 'bg-rose-50',      text: 'text-rose-700' },
-            { label: 'Fours',       val: stats.fours,    icon: Building2,  tint: 'bg-orange-50',    text: 'text-orange-700' },
-            { label: 'Sixes',       val: stats.sixes,    icon: Zap,        tint: 'bg-fuchsia-50',   text: 'text-fuchsia-700' },
-            { label: 'Fifties',     val: stats.fifties,  icon: Trophy,     tint: 'bg-teal-50',      text: 'text-teal-700' },
-            { label: 'Hundreds',    val: stats.hundreds, icon: Trophy,     tint: 'bg-yellow-50',    text: 'text-yellow-700' },
-          ].map((s, i) => {
-            const Icon = s.icon;
-            return (
-              <motion.div
-                key={i}
-                whileTap={{ scale: 0.96 }}
-                className={`relative overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-3 text-center transition hover:border-neutral-300 hover:shadow-sm`}
-              >
-                <div className={`mx-auto flex h-8 w-8 items-center justify-center rounded-xl ${s.tint}`}>
-                  <Icon size={14} strokeWidth={2.4} className={s.text} />
-                </div>
-                <div className={`mt-2 font-mono text-xl font-black leading-none ${s.text}`}>{s.val}</div>
-                <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-neutral-400">{s.label}</div>
-              </motion.div>
-            );
-          })}
+            { label: 'Matches', val: stats.matches },
+            { label: 'Runs Scored', val: stats.runs },
+            { label: 'Highest Score', val: stats.hs },
+            { label: 'Average', val: stats.avg },
+            { label: 'Strike Rate', val: stats.sr },
+            { label: 'Wickets', val: stats.wickets, highlight: 'text-emerald-600' },
+            { label: 'Fours', val: stats.fours },
+            { label: 'Sixes', val: stats.sixes },
+            { label: 'Fifties (50s)', val: stats.fifties },
+            { label: 'Hundreds (100s)', val: stats.hundreds },
+          ].map((s, i) => (
+            <div
+              key={i}
+              className="rounded-2xl border border-neutral-200/60 bg-white p-3.5 text-center transition hover:border-neutral-300"
+            >
+              <div className={`text-xl font-black ${s.highlight || 'text-neutral-900'}`}>{s.val}</div>
+              <div className="mt-0.5 text-[9px] font-bold uppercase tracking-wider text-neutral-400">
+                {s.label}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* ── Recent Innings ── */}
+      {/* Recent Innings Log */}
       <div className="space-y-2">
         <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-400">Recent Innings</h3>
 
         {reversedInnings.length > 0 ? (
           <div className="grid gap-2">
             {reversedInnings.map((inn, index) => {
-              const isFifty  = inn.runs >= 50;
+              const isFifty = inn.runs >= 50;
               const isThirty = inn.runs >= 30 && inn.runs < 50;
-              const colorClass = isFifty ? 'text-emerald-600' : isThirty ? 'text-amber-600' : 'text-neutral-900';
-              const barColor   = isFifty ? 'bg-emerald-500' : isThirty ? 'bg-amber-500' : 'bg-neutral-200';
+              const colorClass = isFifty
+                ? 'text-emerald-600'
+                : isThirty
+                ? 'text-amber-600'
+                : 'text-neutral-900';
 
               return (
                 <div
                   key={index}
-                  className="group relative overflow-hidden rounded-2xl border border-neutral-200/80 bg-white px-4 py-3.5 transition hover:border-neutral-300 hover:shadow-sm"
+                  className="flex items-center justify-between rounded-xl border border-neutral-200/80 bg-white px-4 py-3"
                 >
-                  {/* left accent bar */}
-                  <div className={`absolute left-0 top-0 h-full w-1 ${barColor}`} />
-
-                  <div className="flex items-center justify-between">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-neutral-400 uppercase tracking-wide">
-                        <Activity size={11} className="text-neutral-400" />
-                        vs {inn.opponent}
-                      </div>
-                      <div className="mt-1 flex items-center gap-2 text-[11px] text-neutral-400 font-medium">
-                        <CalendarDays size={11} className="flex-shrink-0 text-neutral-300" />
-                        <span>{inn.date ? new Date(inn.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</span>
-                        <span className="text-neutral-200">·</span>
-                        <span className="font-mono">{inn.balls} balls</span>
-                        <span className="text-neutral-200">·</span>
-                        <span className="font-mono">S/R {sr(inn.runs, inn.balls)}</span>
-                      </div>
+                  <div>
+                    <div className="text-xs font-bold text-neutral-400 uppercase tracking-wide">
+                      vs {inn.opponent}
                     </div>
-                    <div className="text-right">
-                      <span className={`font-mono text-2xl font-black leading-none ${colorClass}`}>
-                        {inn.runs}
-                        {!inn.out && <span className="text-sm font-semibold ml-0.5 text-emerald-500">*</span>}
-                      </span>
+                    <div className="text-[11px] text-neutral-500 font-medium font-mono mt-0.5">
+                      {inn.balls} balls · S/R {sr(inn.runs, inn.balls)}
                     </div>
+                  </div>
+                  <div className="text-right">
+                    <span className={`font-mono text-xl font-black ${colorClass}`}>
+                      {inn.runs}
+                      {!inn.out && <span className="text-sm font-semibold ml-0.5">*</span>}
+                    </span>
                   </div>
                 </div>
               );
@@ -376,7 +330,6 @@ export default function PlayerProfileView({
           </div>
         )}
       </div>
-
     </div>
   );
 }

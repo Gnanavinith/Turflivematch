@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Team } from '../../types';
+import { Team } from '../types';
 import { Plus, Play, AlertTriangle, Shield, Settings, Info } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -213,8 +213,8 @@ export default function NewMatchModal({ teams, onClose, onStartMatch, prefill }:
                 disabled={!!prefill?.seriesId}
                 className="mt-1.5 w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:bg-white animate-none disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <option value="single">Single Match</option>
-                <option value="tournament">Tournament</option>
+                <option value="single">🏏 Single Match</option>
+                <option value="tournament">🏆 Tournament</option>
               </select>
             </div>
 
@@ -372,8 +372,7 @@ export default function NewMatchModal({ teams, onClose, onStartMatch, prefill }:
               type="submit"
               className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 text-sm font-black text-neutral-950 transition hover:bg-emerald-400 shadow-sm"
             >
-              <Play size={14} className="flex-shrink-0" />
-              Start Scoring
+              🏏 Start Scoring
             </button>
           </div>
         </form>

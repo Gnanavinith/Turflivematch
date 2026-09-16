@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Match, Player } from '../../types';
-import { sr, economy, ovStr } from '../../utils/cricket';
-import { ChevronLeft, Award, Calendar, Activity, Info, Users, Shield, Trash2, Trophy, Heart, Zap } from 'lucide-react';
+import { Match, Player } from '../types';
+import { sr, economy, ovStr } from '../utils/cricket';
+import { ChevronLeft, Award, Calendar, Activity, Info, Users, Shield, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { jsPDF } from 'jspdf';
 
@@ -683,33 +683,33 @@ export default function ScorecardDetailView({
   return (
     <div id="scorecard-detail-view" className="space-y-4">
       {/* Back and Export Row */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex items-center justify-between">
         <button
           onClick={onBack}
-          className="inline-flex min-h-[44px] items-center gap-1 -ml-1 py-2 pr-2 text-sm font-semibold text-neutral-500 hover:text-neutral-900 active:scale-95 transition"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-neutral-500 hover:text-neutral-900 transition"
         >
-          <ChevronLeft size={16} className="flex-shrink-0" />
+          <ChevronLeft size={16} />
           Back to Archives
         </button>
 
-        <div className="flex flex-wrap items-center justify-end gap-2">
+        <div className="flex items-center gap-2">
           {isAdmin && onDeleteMatch && (
             <div className="flex items-center gap-1.5">
               {isConfirmingDelete ? (
-                <div className="inline-flex flex-wrap items-center gap-1.5 rounded-xl bg-red-50 p-1 border border-red-200 shadow-xs animate-fadeIn">
+                <div className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 p-1 border border-red-200 shadow-xs animate-fadeIn">
                   <span className="text-[10px] font-black text-red-700 uppercase tracking-wider px-1.5">Confirm Delete?</span>
                   <button
                     onClick={() => {
                       onDeleteMatch(match.id);
                       setIsConfirmingDelete(false);
                     }}
-                    className="rounded-lg bg-red-600 hover:bg-red-700 active:scale-95 px-3 py-2 text-[10px] font-bold text-white shadow-xs transition"
+                    className="rounded-lg bg-red-600 hover:bg-red-700 px-2.5 py-1 text-[10px] font-bold text-white shadow-xs transition"
                   >
                     Delete
                   </button>
                   <button
                     onClick={() => setIsConfirmingDelete(false)}
-                    className="rounded-lg bg-neutral-200 hover:bg-neutral-300 active:scale-95 px-3 py-2 text-[10px] font-bold text-neutral-700 transition"
+                    className="rounded-lg bg-neutral-200 hover:bg-neutral-300 px-2.5 py-1 text-[10px] font-bold text-neutral-700 transition"
                   >
                     Cancel
                   </button>
@@ -717,11 +717,10 @@ export default function ScorecardDetailView({
               ) : (
                 <button
                   onClick={() => setIsConfirmingDelete(true)}
-                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-red-50 hover:bg-red-100 active:scale-95 transition px-4 py-2.5 text-xs font-black text-red-600 border border-red-200 shadow-xs"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 hover:bg-red-100 active:scale-95 transition px-3.5 py-1.5 text-xs font-black text-red-600 border border-red-200 shadow-xs"
                   title="Delete Match"
-                  aria-label="Delete Match"
                 >
-                  <Trash2 size={13} className="flex-shrink-0" />
+                  <Trash2 size={13} />
                   Delete Match
                 </button>
               )}
@@ -730,10 +729,9 @@ export default function ScorecardDetailView({
 
           <button
             onClick={downloadPDF}
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition px-4 py-2.5 text-xs font-black text-white shadow-sm"
-            aria-label="Download PDF"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition px-3.5 py-1.5 text-xs font-black text-white shadow-sm"
           >
-            <svg className="h-3.5 w-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
             Download PDF
@@ -742,36 +740,36 @@ export default function ScorecardDetailView({
       </div>
 
       {/* Match Banner Card */}
-      <div className="rounded-3xl border border-neutral-100 bg-white p-5 shadow-xs">
+      <div className="rounded-3xl border border-neutral-200/80 bg-white p-5 shadow-xs">
         <div className="text-center">
           <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-neutral-500">
             Completed Scorecard
           </span>
-          <h2 className="mt-2 text-xl font-black text-neutral-900 break-words">
+          <h2 className="mt-2 text-xl font-black text-neutral-900">
             {match.team1Name} <span className="text-neutral-400 font-semibold mx-1">VS</span> {match.team2Name}
           </h2>
 
-          <div className="mt-4 inline-flex max-w-full min-w-0 items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 border border-emerald-100 text-sm font-black text-emerald-800">
-            <Award size={16} className="text-emerald-600 flex-shrink-0" />
-            <span className="truncate">{match.result}</span>
+          <div className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 border border-emerald-100 text-sm font-black text-emerald-800">
+            <Award size={16} className="text-emerald-600" />
+            {match.result}
           </div>
         </div>
 
         {/* Quick Innings score preview */}
         <div className="mt-6 grid grid-cols-2 gap-4 border-t border-neutral-100 pt-4">
-          <div className={`p-3 rounded-2xl border text-center min-w-0 ${activeTab === 0 ? 'border-emerald-200 bg-emerald-50/40' : 'border-neutral-100 bg-neutral-50/50'}`}>
-            <span className="block truncate text-[10px] font-black uppercase tracking-wider text-neutral-400">{match.battingFirstName}</span>
-            <div className="text-xl font-black font-mono tabular-nums text-neutral-900 mt-1">
+          <div className={`p-3 rounded-2xl border text-center ${activeTab === 0 ? 'border-emerald-200 bg-emerald-50/40' : 'border-neutral-100 bg-neutral-50/50'}`}>
+            <span className="text-[10px] font-black uppercase tracking-wider text-neutral-400">{match.battingFirstName}</span>
+            <div className="text-xl font-black text-neutral-900 mt-1">
               {match.innings[0].runs}/{match.innings[0].wickets}
             </div>
-            <span className="text-xs text-neutral-500 font-mono tabular-nums">({ovStr(match.innings[0].overs, match.innings[0].balls)} ov)</span>
+            <span className="text-xs text-neutral-500 font-mono">({ovStr(match.innings[0].overs, match.innings[0].balls)} ov)</span>
           </div>
-          <div className={`p-3 rounded-2xl border text-center min-w-0 ${activeTab === 1 ? 'border-emerald-200 bg-emerald-50/40' : 'border-neutral-100 bg-neutral-50/50'}`}>
-            <span className="block truncate text-[10px] font-black uppercase tracking-wider text-neutral-400">{match.fieldingFirstName}</span>
-            <div className="text-xl font-black font-mono tabular-nums text-neutral-900 mt-1">
+          <div className={`p-3 rounded-2xl border text-center ${activeTab === 1 ? 'border-emerald-200 bg-emerald-50/40' : 'border-neutral-100 bg-neutral-50/50'}`}>
+            <span className="text-[10px] font-black uppercase tracking-wider text-neutral-400">{match.fieldingFirstName}</span>
+            <div className="text-xl font-black text-neutral-900 mt-1">
               {match.innings[1].runs}/{match.innings[1].wickets}
             </div>
-            <span className="text-xs text-neutral-500 font-mono tabular-nums">({ovStr(match.innings[1].overs, match.innings[1].balls)} ov)</span>
+            <span className="text-xs text-neutral-500 font-mono">({ovStr(match.innings[1].overs, match.innings[1].balls)} ov)</span>
           </div>
         </div>
       </div>
@@ -779,10 +777,9 @@ export default function ScorecardDetailView({
       {/* Tournament / Series Section */}
       {isTournament && (
         <div className="rounded-3xl border border-amber-200 bg-amber-50/20 p-5 space-y-4 shadow-xs">
-          <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b border-amber-100 pb-2">
-            <span className="min-w-0 truncate text-xs font-black uppercase tracking-wider text-amber-800">
-              <Trophy size={12} className="inline-flex -mt-0.5 mr-1" />
-              Tournament: {match.tournamentName || 'Championship Series'}
+          <div className="flex items-center justify-between border-b border-amber-100 pb-2">
+            <span className="text-xs font-black uppercase tracking-wider text-amber-800">
+              🏆 Tournament: {match.tournamentName || 'Championship Series'}
             </span>
             <span className="text-xs font-black text-neutral-700">{standingText}</span>
           </div>
@@ -792,9 +789,9 @@ export default function ScorecardDetailView({
               <span className="text-[10px] font-black uppercase tracking-wider text-neutral-400">Series Match Results</span>
               <div className="space-y-1">
                 {sortedSeriesMatches.map((m, idx) => (
-                  <div key={m.id} className="flex items-center justify-between gap-2 text-xs">
-                    <span className="flex-shrink-0 text-neutral-500 font-medium">Match {idx + 1}:</span>
-                    <span className={`min-w-0 truncate text-right ${m.id === match.id ? "font-bold text-emerald-600" : "text-neutral-700"}`}>
+                  <div key={m.id} className="flex items-center justify-between text-xs">
+                    <span className="text-neutral-500 font-medium">Match {idx + 1}:</span>
+                    <span className={m.id === match.id ? "font-bold text-emerald-600" : "text-neutral-700"}>
                       {m.status === 'live' ? 'Live in progress' : m.result}
                     </span>
                   </div>
@@ -806,9 +803,11 @@ export default function ScorecardDetailView({
               {isAdmin && !isSeriesFinished && onContinueSeries && (
                 <button
                   onClick={() => onContinueSeries(match.seriesId!, match.team1Id, match.team2Id, totalSeriesMatches, match.tournamentName)}
-                  className="w-full min-h-[44px] rounded-2xl bg-emerald-600 px-3 py-2.5 text-xs font-black text-white transition hover:bg-emerald-700 active:scale-95 shadow-sm flex items-center justify-center gap-1.5"
+                  className="w-full rounded-2xl bg-emerald-600 py-2.5 text-xs font-black text-white transition hover:bg-emerald-700 active:scale-95 shadow-sm flex items-center justify-center gap-1.5"
                 >
-                  <Zap size={14} className="flex-shrink-0" />
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
                   Start Match {sortedSeriesMatches.length + 1} of Series
                 </button>
               )}
@@ -816,7 +815,7 @@ export default function ScorecardDetailView({
               {isAdmin && !isSeriesFinished && onEndSeries && (
                 <button
                   onClick={() => onEndSeries(match.seriesId!)}
-                  className="w-full min-h-[44px] rounded-2xl bg-amber-600 px-3 py-2.5 text-xs font-black text-white transition hover:bg-amber-700 active:scale-95 shadow-sm flex items-center justify-center gap-1.5"
+                  className="w-full rounded-2xl bg-amber-600 py-2.5 text-xs font-black text-white transition hover:bg-amber-700 active:scale-95 shadow-sm flex items-center justify-center gap-1.5"
                 >
                   End Series Early / Complete
                 </button>
@@ -824,8 +823,7 @@ export default function ScorecardDetailView({
 
               {isSeriesFinished && (
                 <div className="rounded-xl bg-neutral-100 p-2.5 text-center text-xs font-black text-neutral-500">
-                  <Trophy size={12} className="inline-flex -mt-0.5 mr-1" />
-                  This Series has finished.
+                  🏆 This Series has finished.
                 </div>
               )}
             </div>
@@ -837,7 +835,7 @@ export default function ScorecardDetailView({
       <div className="flex rounded-xl bg-neutral-100 p-1">
         <button
           onClick={() => setActiveTab(0)}
-          className={`flex-1 min-w-0 truncate rounded-lg px-2 py-2.5 text-xs font-black transition-all ${
+          className={`flex-1 rounded-lg py-2 text-xs font-black transition-all ${
             activeTab === 0 ? 'bg-white text-neutral-900 shadow-xs' : 'text-neutral-500 hover:text-neutral-900'
           }`}
         >
@@ -845,7 +843,7 @@ export default function ScorecardDetailView({
         </button>
         <button
           onClick={() => setActiveTab(1)}
-          className={`flex-1 min-w-0 truncate rounded-lg px-2 py-2.5 text-xs font-black transition-all ${
+          className={`flex-1 rounded-lg py-2 text-xs font-black transition-all ${
             activeTab === 1 ? 'bg-white text-neutral-900 shadow-xs' : 'text-neutral-500 hover:text-neutral-900'
           }`}
         >
@@ -947,7 +945,7 @@ export default function ScorecardDetailView({
       {/* Viewer Footer */}
       {!isAdmin && (
         <div className="pt-6 pb-2 text-center text-xs text-neutral-400 font-semibold tracking-wide border-t border-neutral-100/60 mt-6">
-          Made with <Heart size={12} className="inline-flex -mt-0.5 fill-red-500 text-red-500" /> Ranjith Ramesh
+          Made with ❤️ Ranjith Ramesh
         </div>
       )}
     </div>

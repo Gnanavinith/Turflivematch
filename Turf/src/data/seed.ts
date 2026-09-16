@@ -125,7 +125,6 @@ export const SEED_MATCHES: Match[] = [
         striker: 'p2',
         nonStriker: null,
         bowler: null,
-        previousBowler: null,
         retiredHurt: [],
         history: []
       },
@@ -148,7 +147,6 @@ export const SEED_MATCHES: Match[] = [
         striker: null,
         nonStriker: null,
         bowler: null,
-        previousBowler: null,
         retiredHurt: [],
         history: []
       }

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Match, Player, Team } from '../../types';
 import { sr, ovStr, rr } from '../../utils/cricket';
-import { Undo, RefreshCw, AlertTriangle, Award, ArrowLeftRight, Heart, ChevronDown, ChevronUp } from 'lucide-react';
+import { Undo, RefreshCw, AlertTriangle, Award, ArrowLeftRight, Heart, ChevronDown, ChevronUp, ArrowLeft, Check, HeartPulse, Activity } from 'lucide-react';
 import { motion } from 'motion/react';
 
 import { LiveScoringViewProps, WicketType } from './liveScoring/types';
@@ -89,8 +89,8 @@ export default function LiveScoringView({
     <div id="live-scoring-view" className="space-y-4">
       {/* Top action bar */}
       <div className="flex items-center justify-between">
-        <button onClick={onExit} className="inline-flex min-h-[44px] items-center gap-1 py-2 text-sm font-bold text-neutral-500 hover:text-neutral-900 select-none touch-manipulation">
-          {isAdmin ? '← Save & Exit' : '← Back to Home'}
+        <button onClick={onExit} className="inline-flex min-h-[44px] items-center gap-1.5 py-2 text-sm font-bold text-neutral-500 hover:text-neutral-900 select-none touch-manipulation">
+          {isAdmin ? (<><ArrowLeft size={14} />Save & Exit</>) : (<><ArrowLeft size={14} />Back to Home</>)}
         </button>
         <div className="flex items-center gap-2">
           {isAdmin && !isComplete && onEndMatch && (
@@ -99,7 +99,7 @@ export default function LiveScoringView({
             </button>
           )}
           {isComplete ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 border border-blue-200">✓ Finished</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 border border-blue-200"><Check size={12} />Finished</span>
           ) : (
             <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-600 border border-red-100 animate-pulse">
               <span className="h-1.5 w-1.5 rounded-full bg-red-600"></span>Scoring Live
@@ -219,7 +219,7 @@ export default function LiveScoringView({
             <div className="flex flex-wrap gap-2">
               {[striker, nonStriker].filter(Boolean).map(pid => (
                 <button key={pid} onClick={() => { onRetireHurt(pid!); setShowRetireConfirm(false); }} className="min-h-[44px] max-w-full truncate rounded-lg bg-white border border-amber-300 px-3 py-1.5 text-xs font-bold text-amber-900 shadow-xs hover:bg-amber-100 active:scale-95 transition select-none touch-manipulation">
-                  🤕 {getPlayerName(pid!)}
+                  <HeartPulse size={12} className="flex-shrink-0" />{getPlayerName(pid!)}
                 </button>
               ))}
             </div>
@@ -432,7 +432,7 @@ export default function LiveScoringView({
                   <div className="flex flex-wrap gap-2">
                     {retiredHurtIds.filter(pid => pid !== striker && pid !== nonStriker).map(pid => (
                       <button key={pid} onClick={() => { needsStriker ? onSelectStriker(pid) : onSelectNonStriker(pid); }} className="inline-flex min-h-[44px] max-w-full items-center gap-2 rounded-xl border border-amber-300 bg-white px-4 py-2.5 text-xs font-bold text-neutral-900 shadow-xs hover:border-amber-500 active:scale-95 transition select-none touch-manipulation">
-                        <span className="truncate">🤕 {getPlayerName(pid)}</span>
+                        <span className="truncate"><HeartPulse size={11} className="inline-flex -mt-0.5 mr-1 text-amber-600" />{getPlayerName(pid)}</span>
                       </button>
                     ))}
                   </div>
@@ -505,7 +505,7 @@ export default function LiveScoringView({
       {/* Viewer Footer */}
       {!isAdmin && (
         <div className="pt-6 pb-2 text-center text-xs text-neutral-400 font-semibold tracking-wide border-t border-neutral-100/60 mt-6">
-          Made with ❤️ Ranjith Ramesh
+          Made with <Heart size={12} className="inline-flex -mt-0.5 fill-red-500 text-red-500" /> Ranjith Ramesh
         </div>
       )}
     </div>

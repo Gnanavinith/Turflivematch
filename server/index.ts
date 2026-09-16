@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import dns from 'dns';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -12,6 +13,13 @@ import { matchController } from './controllers/matchController';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Some networks give Node a loopback DNS relay that refuses queries.
+// Fall back to Google Public DNS so SRV lookups (MongoDB Atlas) work.
+const configuredServers = dns.getServers();
+if (configuredServers.every((server) => server === '127.0.0.1' || server === '::1')) {
+  dns.setServers(['8.8.8.8', '8.8.4.4']);
+}
 
 const app = express();
 

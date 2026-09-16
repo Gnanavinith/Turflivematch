@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Player, Match } from '../../types';
-import { getPlayerStats, CalculatedStats } from '../../utils/cricket';
+import { Player, Match } from '../types';
+import { getPlayerStats, CalculatedStats } from '../utils/cricket';
 import { Award, ChevronRight, TrendingUp } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -40,35 +40,31 @@ export default function DatabaseView({ players, matches, onSelectPlayer }: Datab
       </div>
 
       {/* Career Sorting Controls */}
-      <div className="rounded-2xl bg-neutral-100 p-1.5">
-        <div className="mb-1.5 px-2 pt-1 text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">
-          Sort By
-        </div>
-        <div className="no-scrollbar flex snap-x snap-mandatory gap-1.5 overflow-x-auto pb-1">
-          {(
-            [
-              ['runs', 'Most Runs'],
-              ['wickets', 'Top Wickets'],
-              ['hs', 'Highest Score'],
-              ['matches', 'Matches Played'],
-            ] as const
-          ).map(([key, label]) => {
-            const isActive = sortKey === key;
-            return (
-              <button
-                key={key}
-                onClick={() => setSortKey(key)}
-                className={`snap-start whitespace-nowrap rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
-                  isActive
-                    ? 'bg-white text-neutral-950 shadow-sm'
-                    : 'text-neutral-500 hover:text-neutral-950'
-                }`}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
+      <div className="flex flex-wrap items-center gap-1.5 rounded-2xl bg-neutral-100 p-1.5">
+        <span className="px-2 text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">Sort By</span>
+        {(
+          [
+            ['runs', 'Most Runs'],
+            ['wickets', 'Top Wickets'],
+            ['hs', 'Highest Score'],
+            ['matches', 'Matches Played'],
+          ] as const
+        ).map(([key, label]) => {
+          const isActive = sortKey === key;
+          return (
+            <button
+              key={key}
+              onClick={() => setSortKey(key)}
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
+                isActive
+                  ? 'bg-white text-neutral-950 shadow-sm'
+                  : 'text-neutral-500 hover:text-neutral-950'
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Table Card */}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Match, Player, Team } from '../../types';
-import { Play, Plus, Users, Shield, Calendar, ChevronRight } from 'lucide-react';
+import { Play, Users, Shield, Calendar, ChevronRight, Trophy, Activity, Eye, CircleDot, Check } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface HomeViewProps {
@@ -36,67 +36,92 @@ export default function HomeView({
   const liveMatches = matches.filter(m => m.status === 'live');
   const completedMatches = matches.filter(m => m.status === 'complete').slice(0, 3);
 
-  // Quick Stats
-  const totalRunsScored = matches.reduce((acc, m) => {
-    return acc + m.innings[0].runs + m.innings[1].runs;
-  }, 0);
-
   return (
     <div id="home-view" className="space-y-6">
       {/* Hero Welcome Banner */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-3xl bg-neutral-900 px-5 py-8 text-white shadow-xl sm:px-6"
+        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0B1424] via-[#0F172A] to-[#0E2A24] px-5 py-8 text-white shadow-xl sm:px-6"
       >
+        {/* emerald ambient glow */}
+        <div className="pointer-events-none absolute -top-24 -right-16 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-28 -left-16 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+
+        {/* subtle dot grid texture */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 1px 1px, #ffffff 1px, transparent 0)',
+            backgroundSize: '22px 22px',
+          }}
+        />
+
         <div className="relative z-10 min-w-0 max-w-md">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold tracking-wide text-emerald-400">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1 text-xs font-semibold tracking-wide text-emerald-300">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"></span>
             Professional Scorer
           </span>
           <h1 className="mt-3 text-3xl font-black tracking-tight leading-tight sm:text-4xl">
-            Lets Start the Bloody Game!
+            Lets Start the{' '}
+            <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
+              Bloody Game!
+            </span>
           </h1>
+          <p className="mt-2 text-sm font-medium text-slate-400">
+            Score the action, call the shots - live and loud.
+          </p>
           {isAdmin ? (
-            <div className="mt-6 flex flex-wrap gap-3 animate-none">
+            <div className="mt-6 flex flex-wrap gap-3">
               <button
                 id="new-match-hero-btn"
                 onClick={onStartNewMatch}
-                className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-neutral-950 transition hover:bg-emerald-400 active:scale-95 animate-none"
+                className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-neutral-950 shadow-lg shadow-emerald-500/25 transition hover:bg-emerald-400 active:scale-95"
               >
-                <Plus size={16} strokeWidth={2.5} className="flex-shrink-0" />
-                New Match
+                <Play size={15} strokeWidth={2.5} className="flex-shrink-0 fill-current" />
+                Score a Match
+              </button>
+              <button
+                onClick={() => onNavigate('history')}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-bold text-slate-200 backdrop-blur-md transition hover:border-white/20 hover:bg-white/10 active:scale-95"
+              >
+                <Trophy size={14} strokeWidth={2.2} className="flex-shrink-0 text-emerald-300" />
+                View History
               </button>
             </div>
           ) : (
-            <div className="mt-6 flex flex-wrap gap-3 animate-none">
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-4 py-2.5 text-xs font-black text-emerald-400 border border-emerald-500/20 shadow-xs backdrop-blur-md animate-none">
+            <div className="mt-6 flex flex-wrap gap-3">
+              <span className="inline-flex items-center gap-1.5 rounded-xl bg-white/5 px-4 py-2.5 text-xs font-black text-emerald-300 border border-emerald-400/20 shadow-xs backdrop-blur-md">
+                <Eye size={12} className="flex-shrink-0" />
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                🏆 Real-Time Spectator Mode
+                Real-Time Spectator Mode
               </span>
+              <button
+                onClick={() => onNavigate('history')}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold text-slate-200 backdrop-blur-md transition hover:border-white/20 hover:bg-white/10 active:scale-95"
+              >
+                <Trophy size={13} strokeWidth={2.2} className="flex-shrink-0 text-emerald-300" />
+                Match History
+              </button>
             </div>
           )}
         </div>
 
-        {/* Decorative elements */}
         <div className="absolute -right-10 -bottom-10 opacity-10">
-          <svg 
-            width={240} 
-            height={240} 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth={1} 
-            strokeLinecap="round" 
+          <svg
+            width={240}
+            height={240}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1}
+            strokeLinecap="round"
             strokeLinejoin="round"
           >
-            {/* Cricket Bat Handle */}
             <path d="M18.5 2.5L14.5 6.5" />
             <path d="M19.5 3.5L15.5 7.5" />
             <path d="M18.5 2.5L19.5 3.5" />
-            {/* Cricket Bat Blade */}
             <path d="M14.5 6.5L6.5 14.5C5.5 15.5 4.5 17 5 18.5C5.5 20 7 20.5 8.5 19.5L16.5 11.5L14.5 6.5Z" />
-            {/* Cricket Ball */}
             <circle cx="9" cy="9" r="3.5" />
             <path d="M7 8C8 9 8 10 7 11" />
           </svg>
@@ -104,49 +129,44 @@ export default function HomeView({
       </motion.div>
 
       {/* Quick Stats Bento Grid */}
-      <div className="grid grid-cols-3 gap-3">
-        <div
-          id="stat-players"
-          onClick={() => onNavigate('players')}
-          className="min-h-[44px] cursor-pointer rounded-2xl border border-neutral-100 bg-white p-3 text-center shadow-xs transition hover:border-emerald-300 hover:shadow-sm active:scale-[0.98]"
-        >
-          <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-            <Users size={16} className="flex-shrink-0" />
-          </div>
-          <div className="mt-2 font-mono text-xl font-extrabold tabular-nums text-neutral-900">{players.length}</div>
-          <div className="text-[10px] font-black uppercase tracking-wider text-neutral-400">Players</div>
-        </div>
-
-        <div
-          id="stat-teams"
-          onClick={() => onNavigate('teams')}
-          className="min-h-[44px] cursor-pointer rounded-2xl border border-neutral-100 bg-white p-3 text-center shadow-xs transition hover:border-emerald-300 hover:shadow-sm active:scale-[0.98]"
-        >
-          <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-            <Shield size={16} className="flex-shrink-0" />
-          </div>
-          <div className="mt-2 font-mono text-xl font-extrabold tabular-nums text-neutral-900">{teams.length}</div>
-          <div className="text-[10px] font-black uppercase tracking-wider text-neutral-400">Teams</div>
-        </div>
-
-        <div
-          id="stat-matches"
-          onClick={() => onNavigate('history')}
-          className="min-h-[44px] cursor-pointer rounded-2xl border border-neutral-100 bg-white p-3 text-center shadow-xs transition hover:border-emerald-300 hover:shadow-sm active:scale-[0.98]"
-        >
-          <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-purple-50 text-purple-600">
-            <Calendar size={16} className="flex-shrink-0" />
-          </div>
-          <div className="mt-2 font-mono text-xl font-extrabold tabular-nums text-neutral-900">{matches.length}</div>
-          <div className="text-[10px] font-black uppercase tracking-wider text-neutral-400">Matches</div>
-        </div>
+      <div className="grid grid-cols-3 gap-2.5">
+        {[
+          { key: 'players', label: 'Players', value: players.length, icon: Users, chip: 'bg-emerald-50 text-emerald-600', ring: 'hover:border-emerald-300' },
+          { key: 'teams', label: 'Teams', value: teams.length, icon: Shield, chip: 'bg-blue-50 text-blue-600', ring: 'hover:border-blue-300' },
+          { key: 'matches', label: 'Matches', value: matches.length, icon: Calendar, chip: 'bg-amber-50 text-amber-600', ring: 'hover:border-amber-300' },
+        ].map((s) => {
+          const Icon = s.icon;
+          return (
+            <motion.div
+              key={s.key}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => onNavigate(s.key === 'players' ? 'players' : s.key === 'teams' ? 'teams' : 'history')}
+              className={`group relative cursor-pointer overflow-hidden rounded-2xl border border-neutral-100 bg-white p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${s.ring}`}
+            >
+              <div className="flex items-center justify-between">
+                <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${s.chip} transition-transform group-hover:scale-110`}>
+                  <Icon size={15} strokeWidth={2.3} className="flex-shrink-0" />
+                </span>
+                <ChevronRight size={13} strokeWidth={2.2} className="flex-shrink-0 text-neutral-300 transition-all group-hover:translate-x-0.5 group-hover:text-neutral-400" />
+              </div>
+              <div className="mt-3 font-mono text-2xl font-black tabular-nums leading-none text-neutral-900">
+                {s.value}
+              </div>
+              <div className="mt-1 text-[10px] font-bold uppercase tracking-widest text-neutral-400">
+                {s.label}
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* Live Matches Section */}
       {liveMatches.length > 0 && (
         <div id="live-matches-section" className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="min-w-0 truncate text-[10px] font-black uppercase tracking-wider text-neutral-400">Active Live Matches</h2>
+            <h2 className="min-w-0 truncate text-[10px] font-black uppercase tracking-wider text-neutral-400">
+              Active Live Matches
+            </h2>
             <span className="inline-flex flex-shrink-0 items-center gap-1.5 text-[11px] font-black text-red-600">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -176,11 +196,16 @@ export default function HomeView({
               const nonStrikerStats = battingInnings.batting.find(b => b.pid === battingInnings.nonStriker);
               const activeBowlerStats = battingInnings.bowling.find(b => b.pid === battingInnings.bowler);
 
-              const strikerName = battingInnings.striker ? (players.find(p => p.id === battingInnings.striker)?.name || 'Unknown') : null;
-              const nonStrikerName = battingInnings.nonStriker ? (players.find(p => p.id === battingInnings.nonStriker)?.name || 'Unknown') : null;
-              const bowlerName = battingInnings.bowler ? (players.find(p => p.id === battingInnings.bowler)?.name || 'Unknown') : null;
+              const strikerName = battingInnings.striker
+                ? (players.find(p => p.id === battingInnings.striker)?.name || 'Unknown')
+                : null;
+              const nonStrikerName = battingInnings.nonStriker
+                ? (players.find(p => p.id === battingInnings.nonStriker)?.name || 'Unknown')
+                : null;
+              const bowlerName = battingInnings.bowler
+                ? (players.find(p => p.id === battingInnings.bowler)?.name || 'Unknown')
+                : null;
 
-              // Run rate calculation
               const totalBallsFaced = battingInnings.overs * 6 + battingInnings.balls;
               const crr = totalBallsFaced > 0 ? ((battingInnings.runs / totalBallsFaced) * 6).toFixed(2) : '0.00';
               const rrr = isSecondInnings && ballsRemaining > 0 ? ((runsNeeded / ballsRemaining) * 6).toFixed(2) : null;
@@ -188,32 +213,46 @@ export default function HomeView({
               return (
                 <motion.div
                   key={m.id}
-                  whileHover={{ y: -2 }}
+                  whileHover={{ y: -3 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => onResumeMatch(m.id)}
-                  className="group relative cursor-pointer overflow-hidden rounded-3xl border-2 border-neutral-100 bg-white p-5 shadow-sm transition hover:border-emerald-300 hover:shadow-md active:scale-[0.98] animate-none"
+                  className="group relative cursor-pointer overflow-hidden rounded-3xl border border-neutral-100 bg-white p-5 shadow-md transition-all hover:shadow-lg"
                 >
+                  {/* Top live accent strip */}
+                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-500" />
+
                   {/* Card Header */}
                   <div className="flex items-center justify-between gap-2 border-b border-neutral-50 pb-3">
                     <div className="flex min-w-0 items-center gap-2">
                       <span className={`min-w-0 truncate rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wide ${
                         m.matchType === 'tournament'
-                          ? 'bg-amber-100 text-amber-800 border border-amber-200/50'
-                          : 'bg-emerald-100 text-emerald-800 border border-emerald-200/50'
+                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                          : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                       }`}>
-                        {m.matchType === 'tournament' ? `🏆 Tournament${getSeriesInfo(m)}` : '🏏 Single Match'}
+                        {m.matchType === 'tournament' ? (
+                          <>
+                            <Trophy size={9} className="inline-flex -mt-0.5 mr-0.5" />
+                            Tournament{getSeriesInfo(m)}
+                          </>
+                        ) : (
+                          <>
+                            <Activity size={9} className="inline-flex -mt-0.5 mr-0.5" />
+                            Single Match
+                          </>
+                        )}
                       </span>
                       <span className="flex-shrink-0 text-[10px] font-bold tabular-nums text-neutral-400">
                         Overs: {m.totalOvers}
                       </span>
                     </div>
-                    <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[9px] font-black text-red-600 border border-red-200/50">
+                    <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[9px] font-black text-red-600 border border-red-200">
                       <span className="h-1 w-1 rounded-full bg-red-500 animate-pulse" />
                       Innings {m.currentInnings}
                     </span>
                   </div>
 
                   {/* Teams and Main Live Score */}
-                  <div className="mt-4 flex items-center justify-between gap-3">
+                  <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-neutral-50 p-3">
                     <div className="min-w-0 space-y-1">
                       <div className="flex min-w-0 items-center gap-2">
                         <span className="min-w-0 truncate text-sm font-semibold text-neutral-500">{bowlingTeamName}</span>
@@ -225,7 +264,7 @@ export default function HomeView({
                       </div>
                       <div className="flex min-w-0 items-baseline gap-2">
                         <span className="min-w-0 truncate text-xl font-black leading-tight text-neutral-900">{battingTeamName}</span>
-                        <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9px] font-extrabold text-emerald-700 animate-pulse">
+                        <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-extrabold text-emerald-700 animate-pulse">
                           Batting
                         </span>
                       </div>
@@ -242,7 +281,7 @@ export default function HomeView({
                   </div>
 
                   {/* Equation details */}
-                  <div className="mt-3 bg-neutral-50 rounded-xl p-3 border border-neutral-100/50">
+                  <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50/50 p-3">
                     <p className="text-xs font-extrabold text-neutral-800">
                       {isSecondInnings ? (
                         runsNeeded <= 0 ? (
@@ -251,7 +290,9 @@ export default function HomeView({
                           <span className="text-red-600">Innings completed.</span>
                         ) : (
                           <span>
-                            {battingTeamName} needs <strong className="text-emerald-600 font-black">{runsNeeded}</strong> runs in <strong className="text-neutral-900 font-black">{ballsRemaining}</strong> balls
+                            {battingTeamName} needs{' '}
+                            <strong className="text-emerald-600 font-black">{runsNeeded}</strong> runs in{' '}
+                            <strong className="text-neutral-900 font-black">{ballsRemaining}</strong> balls
                           </span>
                         )
                       ) : (
@@ -259,24 +300,29 @@ export default function HomeView({
                       )}
                     </p>
 
-                    {/* CRR and RRR info */}
                     <div className="mt-1.5 flex gap-4 text-[10px] font-bold text-neutral-500">
-                      <span>CRR: <strong className="font-mono tabular-nums text-neutral-700">{crr}</strong></span>
+                      <span>
+                        CRR: <strong className="font-mono tabular-nums text-neutral-700">{crr}</strong>
+                      </span>
                       {rrr && (
-                        <span>RRR: <strong className="font-mono tabular-nums text-emerald-600">{rrr}</strong></span>
+                        <span>
+                          RRR: <strong className="font-mono tabular-nums text-emerald-600">{rrr}</strong>
+                        </span>
                       )}
                     </div>
                   </div>
 
-                  {/* Batter / Bowler stats if assigned */}
+                  {/* Batter / Bowler stats */}
                   {(strikerName || nonStrikerName || bowlerName) && (
-                    <div className="mt-4 grid grid-cols-2 gap-4 border-t border-neutral-100 pt-3 text-xs">
-                      {/* Active Batsmen */}
-                      <div className="min-w-0 space-y-1 border-r border-neutral-100 pr-2">
+                    <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                      <div className="min-w-0 space-y-1 rounded-xl bg-neutral-50 p-2.5">
                         <div className="text-[10px] font-black uppercase tracking-wider text-neutral-400">Batter</div>
                         {strikerName && (
                           <div className="flex min-w-0 items-center justify-between gap-1 text-neutral-800 font-semibold">
-                            <span className="min-w-0 truncate">🏏 {strikerName}*</span>
+                            <span className="min-w-0 truncate">
+                              <Activity size={11} className="inline-flex -mt-0.5 mr-1 text-emerald-600" />
+                              {strikerName}*
+                            </span>
                             <span className="flex-shrink-0 font-mono font-bold tabular-nums text-neutral-900">
                               {strikerStats?.runs || 0}({strikerStats?.balls || 0})
                             </span>
@@ -284,7 +330,10 @@ export default function HomeView({
                         )}
                         {nonStrikerName && (
                           <div className="flex min-w-0 items-center justify-between gap-1 text-neutral-500">
-                            <span className="min-w-0 truncate">🏏 {nonStrikerName}</span>
+                            <span className="min-w-0 truncate">
+                              <Activity size={11} className="inline-flex -mt-0.5 mr-1 text-neutral-400" />
+                              {nonStrikerName}
+                            </span>
                             <span className="flex-shrink-0 font-mono tabular-nums">
                               {nonStrikerStats?.runs || 0}({nonStrikerStats?.balls || 0})
                             </span>
@@ -292,16 +341,18 @@ export default function HomeView({
                         )}
                       </div>
 
-                      {/* Active Bowler */}
-                      <div className="min-w-0 space-y-1 pl-1">
+                      <div className="min-w-0 space-y-1 rounded-xl bg-neutral-50 p-2.5">
                         <div className="text-[10px] font-black uppercase tracking-wider text-neutral-400">Bowler</div>
                         {bowlerName ? (
                           <div className="space-y-0.5">
                             <div className="min-w-0 truncate font-semibold text-neutral-800">
-                              🥎 {bowlerName}
+                              <CircleDot size={11} className="inline-flex -mt-0.5 mr-1 text-blue-500" />
+                              {bowlerName}
                             </div>
                             <div className="font-mono text-[10px] tabular-nums text-neutral-500">
-                              {activeBowlerStats?.overs || 0}.{activeBowlerStats?.balls || 0}-{activeBowlerStats?.maidens || 0}-{activeBowlerStats?.runs || 0}-{activeBowlerStats?.wickets || 0}
+                              {activeBowlerStats?.overs || 0}.{activeBowlerStats?.balls || 0}-
+                              {activeBowlerStats?.maidens || 0}-{activeBowlerStats?.runs || 0}-
+                              {activeBowlerStats?.wickets || 0}
                             </div>
                           </div>
                         ) : (
@@ -314,20 +365,22 @@ export default function HomeView({
                   {/* Over history (balls) */}
                   {battingInnings.currentOver && battingInnings.currentOver.length > 0 && (
                     <div className="mt-3 flex items-start gap-2 border-t border-neutral-50 pt-2.5">
-                      <span className="flex-shrink-0 pt-0.5 text-[9px] font-black uppercase tracking-wider text-neutral-400">This Over:</span>
+                      <span className="flex-shrink-0 pt-0.5 text-[9px] font-black uppercase tracking-wider text-neutral-400">
+                        This Over:
+                      </span>
                       <div className="flex flex-wrap gap-1">
                         {battingInnings.currentOver.map((ball, idx) => {
                           const isWicket = ball === 'W' || ball.includes('+W');
                           const isBoundary4 = ball === '4';
                           const isBoundary6 = ball === '6';
                           const isExtra = ball === 'Wd' || ball === 'Nb' || ball.startsWith('Wd+') || ball.startsWith('Nb+');
-                          const isByeLb = ball.startsWith('B') && ball.length <= 2 && ball !== 'B' || ball.startsWith('Lb');
+                          const isByeLb = (ball.startsWith('B') && ball.length <= 2 && ball !== 'B') || ball.startsWith('Lb');
                           return (
                             <span
                               key={idx}
                               className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 font-mono text-[9px] font-black leading-none ${
                                 isWicket
-                                  ? 'bg-red-500 text-white shadow-xs shadow-red-200'
+                                  ? 'bg-red-500 text-white shadow-sm shadow-red-200'
                                   : isBoundary4
                                   ? 'bg-emerald-500 text-white'
                                   : isBoundary6
@@ -335,10 +388,10 @@ export default function HomeView({
                                   : isByeLb
                                   ? 'bg-sky-50 text-sky-700 border border-sky-200'
                                   : isExtra
-                                  ? 'bg-amber-100 text-amber-800 border border-amber-200/50'
+                                  ? 'bg-amber-100 text-amber-800 border border-amber-200'
                                   : ball === '0'
                                   ? 'bg-neutral-100 text-neutral-500'
-                                  : 'bg-blue-50 text-blue-700 border border-blue-200/50'
+                                  : 'bg-blue-50 text-blue-700 border border-blue-200'
                               }`}
                             >
                               {ball}
@@ -355,7 +408,8 @@ export default function HomeView({
                       TURFCRICS ENGINE
                     </span>
                     <span className="inline-flex flex-shrink-0 items-center gap-1 text-xs font-black text-emerald-600 group-hover:underline">
-                      {isAdmin ? 'Score Match' : 'Watch Live'} <ChevronRight size={14} className="flex-shrink-0 stroke-[2.5px]" />
+                      {isAdmin ? 'Score Match' : 'Watch Live'}
+                      <ChevronRight size={14} className="flex-shrink-0 stroke-[2.5px] transition-transform group-hover:translate-x-0.5" />
                     </span>
                   </div>
                 </motion.div>
@@ -382,47 +436,61 @@ export default function HomeView({
             {completedMatches.map(m => (
               <motion.div
                 key={m.id}
-                whileHover={{ y: -1 }}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => onViewMatchDetails(m.id)}
-                className="cursor-pointer rounded-2xl border border-neutral-100 bg-white p-4 transition hover:border-neutral-200 hover:shadow-sm"
+                className="group relative cursor-pointer overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-sm transition-all hover:border-neutral-200 hover:shadow-md"
               >
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-semibold text-neutral-400">
-                    {m.matchType === 'tournament' ? `Tournament${getSeriesInfo(m)}` : 'Completed'} · {m.totalOvers} Overs
-                  </div>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold text-neutral-600">
-                    Final Scorecard
-                  </span>
-                </div>
+                {/* Top accent strip */}
+                <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-500 opacity-0 transition-opacity group-hover:opacity-100" />
 
-                <div className="mt-3 flex items-center justify-between">
-                  <div>
-                    <span className="font-bold text-neutral-800">{m.team1Name}</span>
-                    <span className="mx-2 text-xs text-neutral-400">vs</span>
-                    <span className="font-bold text-neutral-800">{m.team2Name}</span>
-                  </div>
-                </div>
-
-                <div className="mt-2 text-sm font-black text-emerald-600">
-                  {m.result}
-                </div>
-
-                <div className="mt-3 flex items-center justify-between border-t border-neutral-50 pt-2 text-xs text-neutral-500">
-                  <div className="flex gap-4">
-                    <span>
-                      {m.battingFirstName}:{' '}
-                      <strong className="font-mono text-neutral-700">
-                        {m.innings[0].runs}/{m.innings[0].wickets}
-                      </strong>
-                    </span>
-                    <span>
-                      {m.fieldingFirstName}:{' '}
-                      <strong className="font-mono text-neutral-700">
-                        {m.innings[1].runs}/{m.innings[1].wickets}
-                      </strong>
+                <div className="p-4">
+                  {/* Meta row */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-1.5 text-[11px] font-semibold text-neutral-400">
+                      {m.matchType === 'tournament' ? (
+                        <><Trophy size={11} className="flex-shrink-0 text-amber-500" /> <span className="truncate">Tournament{getSeriesInfo(m)}</span></>
+                      ) : (
+                        <><Activity size={11} className="flex-shrink-0 text-emerald-500" /> <span className="truncate">Completed</span></>
+                      )}
+                    </div>
+                    <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-bold text-neutral-500">
+                      <Check size={10} strokeWidth={3} className="text-emerald-600" />
+                      Final
                     </span>
                   </div>
-                  <ChevronRight size={14} className="text-neutral-400" />
+
+                  {/* Teams */}
+                  <div className="mt-3 flex items-center gap-2 text-sm">
+                    <span className="min-w-0 truncate font-bold text-neutral-900">{m.team1Name}</span>
+                    <span className="flex-shrink-0 font-mono text-[10px] font-bold text-neutral-300">VS</span>
+                    <span className="min-w-0 truncate font-bold text-neutral-900">{m.team2Name}</span>
+                  </div>
+
+                  {/* Scoreboard */}
+                  <div className="mt-3 rounded-xl border border-neutral-100 bg-neutral-50/70 px-3 py-2.5">
+                    <div className="flex items-center justify-between text-xs text-neutral-500">
+                      <span className="min-w-0 truncate">
+                        {m.battingFirstName}
+                        <strong className="ml-1.5 font-mono tabular-nums text-neutral-900">
+                          {m.innings[0].runs}/{m.innings[0].wickets}
+                        </strong>
+                      </span>
+                      <span className="mx-2 h-3 w-px flex-shrink-0 bg-neutral-200" />
+                      <span className="min-w-0 truncate">
+                        {m.fieldingFirstName}
+                        <strong className="ml-1.5 font-mono tabular-nums text-neutral-900">
+                          {m.innings[1].runs}/{m.innings[1].wickets}
+                        </strong>
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between border-t border-neutral-100 pt-2">
+                      <span className="min-w-0 truncate text-[11px] font-bold text-emerald-600">
+                        {m.result}
+                      </span>
+                      <span className="flex-shrink-0 text-[10px] font-semibold text-neutral-400">{m.totalOvers} ov</span>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             ))}
