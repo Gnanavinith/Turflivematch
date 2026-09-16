@@ -26,7 +26,9 @@ import {
 import { safeStorage } from '../utils/storage';
 
 export function useCricketData(triggerToast: (message: string, type?: 'success' | 'warn' | 'info') => void) {
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(() => {
+    return safeStorage.getItem('cricket_players') !== null || safeStorage.getItem('cricket_teams') !== null || safeStorage.getItem('cricket_matches') !== null;
+  });
 
   const [players, setPlayers] = useState<Player[]>(() => {
     const saved = safeStorage.getItem('cricket_players');
@@ -48,7 +50,90 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
 
   const syncPlayers = (updated: Player[]) => { setPlayers(updated); safeStorage.setItem('cricket_players', JSON.stringify(updated)); };
   const syncTeams = (updated: Team[]) => { setTeams(updated); safeStorage.setItem('cricket_teams', JSON.stringify(updated)); };
-  const syncMatches = (updated: Match[]) => { setMatches(updated); safeStorage.setItem('cricket_matches', JSON.stringify(updated)); };
+
+  // ── Reliable match sync ──────────────────────────────────────────────
+  // A match edited on THIS device stays authoritative until the server confirms
+  // the save. Polling and the initial fetch never overwrite it, so scored runs
+  // can't flicker back to zero when the backend is slow or briefly unavailable.
+  // Failed saves are retried on every poll tick and persisted so a page reload
+  // doesn't lose them either.
+  const PENDING_KEY = 'cricket_pending_sync';
+  const pendingSyncRef = useRef<Map<string, Match>>(new Map());
+  const syncingRef = useRef<Set<string>>(new Set());
+  const lastLocalSyncRef = useRef<Record<string, number>>({});
+
+  const persistPending = () => {
+    try { safeStorage.setItem(PENDING_KEY, JSON.stringify(Array.from(pendingSyncRef.current.entries()))); }
+    catch (e) { console.error('Error persisting pending sync:', e); }
+  };
+
+  useEffect(() => {
+    const raw = safeStorage.getItem(PENDING_KEY);
+    if (!raw) return;
+    try {
+      const entries: [string, Match][] = JSON.parse(raw);
+      if (Array.isArray(entries)) {
+        entries.forEach(([id, match]) => { if (match && match.id) pendingSyncRef.current.set(id, match); });
+      }
+    } catch (e) { safeStorage.removeItem(PENDING_KEY); }
+  }, []);
+
+  const syncMatches = (updated: Match[]) => {
+    setMatches(prev => {
+      const changedIds = updated
+        .filter(nm => { const om = prev.find(p => p.id === nm.id); return !om || JSON.stringify(om) !== JSON.stringify(nm); })
+        .map(nm => nm.id);
+      if (changedIds.length) {
+        const now = Date.now();
+        changedIds.forEach(id => {
+          const fresh = updated.find(u => u.id === id);
+          if (fresh) pendingSyncRef.current.set(id, fresh);
+          lastLocalSyncRef.current[id] = now;
+        });
+        persistPending();
+      }
+      safeStorage.setItem('cricket_matches', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const attemptSync = useCallback(async (id: string) => {
+    const match = pendingSyncRef.current.get(id);
+    if (!match || syncingRef.current.has(id)) return;
+    syncingRef.current.add(id);
+    try {
+      await saveMatch(match);
+      // Only clear when no newer local edit replaced this entry mid-save.
+      if (pendingSyncRef.current.get(id) === match) {
+        pendingSyncRef.current.delete(id);
+        persistPending();
+      }
+    } catch (err) {
+      console.error('Match sync failed (will retry):', err);
+    } finally {
+      syncingRef.current.delete(id);
+    }
+  }, []);
+
+  const proxyMatches = (incoming: Match[]) => {
+    setMatches(prev => {
+      const incomingMap = new Map(incoming.map(m => [m.id, m]));
+      const now = Date.now();
+      const merged = prev.map(p => {
+        const pendingLocal = pendingSyncRef.current.has(p.id);
+        const freshSync = (lastLocalSyncRef.current[p.id] || 0) > now - 10000;
+        if (pendingLocal || freshSync) return p;
+        return incomingMap.get(p.id) ?? p;
+      });
+      const seen = new Set(merged.map(m => m.id));
+      for (const im of incoming) {
+        if (!seen.has(im.id)) { merged.push(im); seen.add(im.id); }
+      }
+      if (JSON.stringify(merged) === JSON.stringify(prev)) return prev;
+      safeStorage.setItem('cricket_matches', JSON.stringify(merged));
+      return merged;
+    });
+  };
 
   useEffect(() => {
     let active = true;
@@ -58,22 +143,32 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
         if (!active) return;
         setPlayers(data.players); safeStorage.setItem('cricket_players', JSON.stringify(data.players));
         setTeams(data.teams); safeStorage.setItem('cricket_teams', JSON.stringify(data.teams));
-        setMatches(data.matches); safeStorage.setItem('cricket_matches', JSON.stringify(data.matches));
+        proxyMatches(data.matches);
       } catch (err) { console.error('Error fetching initial data from API:', err); }
       finally { setIsHydrated(true); }
     };
     loadInitialData();
+    for (const id of Array.from(pendingSyncRef.current.keys())) {
+      if (active) attemptSync(id);
+    }
+    // Render free-tier cold starts can take 20-30s. Never block the whole UI that long —
+    // show cached/empty data after a short grace period so the user can interact immediately.
+    const hydrationFallback = setTimeout(() => { if (active) setIsHydrated(true); }, 3000);
     const pollInterval = setInterval(async () => {
+      // Retry any matches whose save hasn't reached the server yet.
+      for (const id of Array.from(pendingSyncRef.current.keys())) {
+        if (active) attemptSync(id);
+      }
       try {
         const data = await fetchInitialData();
         if (!active) return;
         setPlayers(prev => { if (JSON.stringify(prev) === JSON.stringify(data.players)) return prev; safeStorage.setItem('cricket_players', JSON.stringify(data.players)); return data.players; });
         setTeams(prev => { if (JSON.stringify(prev) === JSON.stringify(data.teams)) return prev; safeStorage.setItem('cricket_teams', JSON.stringify(data.teams)); return data.teams; });
-        setMatches(prev => { if (JSON.stringify(prev) === JSON.stringify(data.matches)) return prev; safeStorage.setItem('cricket_matches', JSON.stringify(data.matches)); return data.matches; });
+        proxyMatches(data.matches);
       } catch (_err) { /* silent */ }
     }, 3000);
-    return () => { active = false; clearInterval(pollInterval); };
-  }, []);
+    return () => { active = false; clearTimeout(hydrationFallback); clearInterval(pollInterval); };
+  }, [attemptSync]);
 
   const handleAddPlayer = useCallback(async (pData: Omit<Player, 'id' | 'stats'>) => {
     const newPlayer: Player = { ...pData, id: uid(), stats: { matches: 0, runs: 0, balls: 0, wickets: 0, fifties: 0, hundreds: 0, fours: 0, sixes: 0 } };
@@ -147,7 +242,7 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
       lastPlayerSolo: config.lastPlayerSolo
     };
     syncMatches([newMatch, ...matches]);
-    try { await saveMatch(newMatch); } catch (err) { console.error('Error starting match:', err); }
+    attemptSync(newMatch.id);
     triggerToast('Match initiated! Configure striker & non-striker to begin.');
     return newMatch.id;
   }, [matches, triggerToast]);
@@ -157,7 +252,7 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
     if (!currentMatch) return;
     const updated = deliverBall(currentMatch, outcome, teams, wicketDetail);
     syncMatches(matches.map(m => (m.id === activeMatchId ? updated : m)));
-    try { await saveMatch(updated); } catch (err) { console.error('Error delivering ball:', err); }
+    attemptSync(activeMatchId);
     if (outcome === 'W') { const typeStr = wicketDetail ? wicketDetail.type : 'Wicket'; triggerToast(`${typeStr} fallen!`, 'warn'); }
     else if (outcome === '4') triggerToast('Brilliant Boundary (4 runs!)');
     else if (outcome === '6') triggerToast('Colossal Six! (6 runs!)');
@@ -169,7 +264,7 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
     const updated = undoLastBall(currentMatch);
     if (updated) {
       syncMatches(matches.map(m => (m.id === activeMatchId ? updated : m)));
-      try { await saveMatch(updated); } catch (err) { console.error('Error undoing ball:', err); }
+      attemptSync(activeMatchId);
       triggerToast('Last ball undone', 'info');
     } else { triggerToast('Nothing to undo', 'warn'); }
   }, [matches, triggerToast]);
@@ -179,7 +274,7 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
     if (!currentMatch) return;
     const updated = swapBatsmen(currentMatch);
     syncMatches(matches.map(m => (m.id === activeMatchId ? updated : m)));
-    try { await saveMatch(updated); } catch (err) { console.error('Error swapping batsmen:', err); }
+    attemptSync(activeMatchId);
     triggerToast('Strike swapped');
   }, [matches, triggerToast]);
 
@@ -188,7 +283,7 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
     if (!currentMatch) return;
     const updated = retireHurt(currentMatch, pid, teams);
     syncMatches(matches.map(m => (m.id === activeMatchId ? updated : m)));
-    try { await saveMatch(updated); } catch (err) { console.error('Error retiring batsman:', err); }
+    attemptSync(activeMatchId);
     triggerToast('Batter retired hurt', 'warn');
   }, [matches, teams, triggerToast]);
 
@@ -197,7 +292,7 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
     if (!currentMatch) return;
     const updated = selectStriker(currentMatch, pid);
     syncMatches(matches.map(m => (m.id === activeMatchId ? updated : m)));
-    try { await saveMatch(updated); } catch (err) { console.error('Error selecting striker:', err); }
+    attemptSync(activeMatchId);
   }, [matches]);
 
   const handleSelectNonStriker = useCallback(async (activeMatchId: string, pid: string) => {
@@ -205,7 +300,7 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
     if (!currentMatch) return;
     const updated = selectNonStriker(currentMatch, pid);
     syncMatches(matches.map(m => (m.id === activeMatchId ? updated : m)));
-    try { await saveMatch(updated); } catch (err) { console.error('Error selecting non-striker:', err); }
+    attemptSync(activeMatchId);
   }, [matches]);
 
   const handleSelectBowler = useCallback(async (activeMatchId: string, pid: string) => {
@@ -213,7 +308,7 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
     if (!currentMatch) return;
     const updated = selectBowler(currentMatch, pid);
     syncMatches(matches.map(m => (m.id === activeMatchId ? updated : m)));
-    try { await saveMatch(updated); } catch (err) { console.error('Error selecting bowler:', err); }
+    attemptSync(activeMatchId);
     triggerToast('Bowler changed successfully!', 'success');
   }, [matches, triggerToast]);
 
@@ -222,7 +317,7 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
     if (!currentMatch) return;
     const updated = replaceBatsman(currentMatch, type, pid);
     syncMatches(matches.map(m => (m.id === activeMatchId ? updated : m)));
-    try { await saveMatch(updated); } catch (err) { console.error('Error replacing batsman:', err); }
+    attemptSync(activeMatchId);
     triggerToast('Batsman changed successfully!', 'success');
   }, [matches, triggerToast]);
 
@@ -231,14 +326,14 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
     if (!currentMatch) return;
     const updated = endMatchManual(currentMatch);
     syncMatches(matches.map(m => (m.id === activeMatchId ? updated : m)));
-    try { await saveMatch(updated); } catch (err) { console.error('Error ending match:', err); }
+    attemptSync(activeMatchId);
     triggerToast('Match ended manually!', 'info');
   }, [matches, triggerToast]);
 
   const handleEndSeries = useCallback(async (seriesId: string) => {
     const updatedList = matches.map(m => m.seriesId === seriesId ? { ...m, seriesEnded: true } : m);
     syncMatches(updatedList);
-    for (const m of updatedList.filter(m => m.seriesId === seriesId)) { try { await saveMatch(m); } catch (err) { console.error('Error ending series:', err); } }
+    updatedList.filter(m => m.seriesId === seriesId).forEach(m => attemptSync(m.id));
     triggerToast('Series ended successfully!', 'success');
   }, [matches, triggerToast]);
 

@@ -37,7 +37,7 @@ export const matchController = {
       const match = await Match.findOneAndUpdate(
         { id: req.params.id },
         req.body,
-        { new: true }
+        { new: true, upsert: true }
       ).lean();
       if (!match) return res.status(404).json({ error: 'Match not found' });
       res.json(match);

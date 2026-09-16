@@ -12,22 +12,25 @@ export async function fetchPlayers(): Promise<Player[]> {
 export async function savePlayer(player: Player): Promise<void> {
   const existing = await fetch(`${API_URL}/players/${player.id}`);
   if (existing.ok) {
-    await fetch(`${API_URL}/players/${player.id}`, {
+    const res = await fetch(`${API_URL}/players/${player.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(player),
     });
+    if (!res.ok) throw new Error(`Failed to update player (${res.status})`);
   } else {
-    await fetch(`${API_URL}/players`, {
+    const res = await fetch(`${API_URL}/players`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(player),
     });
+    if (!res.ok) throw new Error(`Failed to create player (${res.status})`);
   }
 }
 
 export async function removePlayer(playerId: string): Promise<void> {
-  await fetch(`${API_URL}/players/${playerId}`, { method: 'DELETE' });
+  const res = await fetch(`${API_URL}/players/${playerId}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(`Failed to delete player (${res.status})`);
 }
 
 // ============ TEAMS ============
@@ -40,22 +43,25 @@ export async function fetchTeams(): Promise<Team[]> {
 export async function saveTeam(team: Team): Promise<void> {
   const existing = await fetch(`${API_URL}/teams/${team.id}`);
   if (existing.ok) {
-    await fetch(`${API_URL}/teams/${team.id}`, {
+    const res = await fetch(`${API_URL}/teams/${team.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(team),
     });
+    if (!res.ok) throw new Error(`Failed to update team (${res.status})`);
   } else {
-    await fetch(`${API_URL}/teams`, {
+    const res = await fetch(`${API_URL}/teams`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(team),
     });
+    if (!res.ok) throw new Error(`Failed to create team (${res.status})`);
   }
 }
 
 export async function removeTeam(teamId: string): Promise<void> {
-  await fetch(`${API_URL}/teams/${teamId}`, { method: 'DELETE' });
+  const res = await fetch(`${API_URL}/teams/${teamId}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(`Failed to delete team (${res.status})`);
 }
 
 // ============ MATCHES ============
@@ -66,24 +72,17 @@ export async function fetchMatches(): Promise<Match[]> {
 }
 
 export async function saveMatch(match: Match): Promise<void> {
-  const existing = await fetch(`${API_URL}/matches/${match.id}`);
-  if (existing.ok) {
-    await fetch(`${API_URL}/matches/${match.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(match),
-    });
-  } else {
-    await fetch(`${API_URL}/matches`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(match),
-    });
-  }
+  const res = await fetch(`${API_URL}/matches/${match.id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(match),
+  });
+  if (!res.ok) throw new Error(`Failed to save match (${res.status})`);
 }
 
 export async function removeMatch(matchId: string): Promise<void> {
-  await fetch(`${API_URL}/matches/${matchId}`, { method: 'DELETE' });
+  const res = await fetch(`${API_URL}/matches/${matchId}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(`Failed to delete match (${res.status})`);
 }
 
 // ============ RESET ============

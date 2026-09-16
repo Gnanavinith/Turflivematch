@@ -7,6 +7,9 @@ interface AppHeaderProps {
   onLogout: () => void;
 }
 
+const APP_NAME = import.meta.env.VITE_APP_NAME ?? 'TurfCricket';
+const APP_LOGO = import.meta.env.VITE_APP_LOGO ?? '/logo.png';
+
 export default function AppHeader({ isAdmin, onLogin, onLogout }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-40 bg-white/90 border-b border-neutral-100 backdrop-blur-md px-4 py-3 shadow-sm">
@@ -15,15 +18,15 @@ export default function AppHeader({ isAdmin, onLogin, onLogout }: AppHeaderProps
         <div className="flex items-center gap-2">
           <div className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl ">
             <img
-              src="/logo.png"
-              alt="TurfCricket logo"
+              src={APP_LOGO}
+              alt={`${APP_NAME} logo`}
               className="h-full w-full object-cover"
               draggable={false}
             />
           </div>
           <div className="flex flex-col leading-none">
             <span className="text-sm font-black tracking-tight text-neutral-900">
-              TurfCricket
+              {APP_NAME}
               <span className="text-emerald-500">.</span>
             </span>
             <div className="mt-0.5 flex items-center gap-1">

@@ -80,8 +80,15 @@ export default function LiveScoringView({
 
   const totalExtras = inn.extras.wide + inn.extras.noBall + inn.extras.bye + inn.extras.legBye;
 
+  const handleDeliverBallScrolled = (outcome: string, wicketDetail?: WicketType) => {
+    onDeliverBall(outcome, wicketDetail);
+    if (outcome !== 'W') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const handleWicketSubmit = (wicketType: WicketType, bowlerId: string | undefined, helperId: string | undefined, outPlayerId: string | undefined, runOutRuns: number | undefined) => {
-    onDeliverBall('W', { type: wicketType, bowlerId, helperId, outPlayerId, runOutRuns });
+    handleDeliverBallScrolled('W', { type: wicketType, bowlerId, helperId, outPlayerId, runOutRuns });
     setShowWicketModal(false);
   };
 
@@ -456,7 +463,7 @@ export default function LiveScoringView({
       {/* Primary Scoring Control Buttons */}
       {canScore && !isComplete && isAdmin && (
         <ScoringControls
-          onDeliverBall={onDeliverBall}
+          onDeliverBall={handleDeliverBallScrolled}
           onUndoLastBall={onUndoLastBall}
           onShowWicketModal={() => setShowWicketModal(true)}
           onShowNoBallModal={() => setShowNoBallRunsModal(true)}
@@ -497,7 +504,7 @@ export default function LiveScoringView({
 
       {showNoBallRunsModal && (
         <NoBallRunsModal
-          onDeliverBall={onDeliverBall}
+          onDeliverBall={handleDeliverBallScrolled}
           onClose={() => setShowNoBallRunsModal(false)}
         />
       )}
