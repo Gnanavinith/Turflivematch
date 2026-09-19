@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Player, Team, Match } from '../../types';
-import { Plus, Edit2, Trash2, Shield, Users, Check } from 'lucide-react';
+import { Plus, Edit2, Trash2, Shield, Users, Check, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface TeamsViewProps {
@@ -8,8 +8,8 @@ interface TeamsViewProps {
   players: Player[];
   matches: Match[];
   isAdmin?: boolean;
-  onAddTeam: (team: Omit<Team, 'id'>) => void;
-  onEditTeam: (id: string, team: Omit<Team, 'id'>) => void;
+  onAddTeam: (team: Omit<Team, 'id'>) => Promise<boolean>;
+  onEditTeam: (id: string, team: Omit<Team, 'id'>) => Promise<boolean>;
   onDeleteTeam: (id: string) => void;
 }
 
@@ -24,6 +24,7 @@ export default function TeamsView({
 }: TeamsViewProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+  const [saving, setSaving] = useState(false);
 
   // Form states
   const [name, setName] = useState('');
@@ -49,21 +50,21 @@ export default function TeamsView({
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim() || saving) return;
 
     const teamData = {
       name: name.trim(),
       playerIds: selectedPlayerIds,
     };
 
-    if (editingTeam) {
-      onEditTeam(editingTeam.id, teamData);
-    } else {
-      onAddTeam(teamData);
-    }
-    setIsModalOpen(false);
+    setSaving(true);
+    const ok = editingTeam
+      ? await onEditTeam(editingTeam.id, teamData)
+      : await onAddTeam(teamData);
+    setSaving(false);
+    if (ok) setIsModalOpen(false);
   };
 
   const calculateTeamStats = (teamId: string) => {
@@ -259,7 +260,8 @@ export default function TeamsView({
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="rounded-lg bg-neutral-50 p-1.5 text-neutral-400 hover:bg-neutral-100"
+                disabled={saving}
+                className="rounded-lg bg-neutral-50 p-1.5 text-neutral-400 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Plus size={16} className="rotate-45" />
               </button>
@@ -336,15 +338,24 @@ export default function TeamsView({
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 rounded-xl bg-neutral-100 py-2.5 text-sm font-bold text-neutral-600 transition hover:bg-neutral-200"
+                  disabled={saving}
+                  className="flex-1 rounded-xl bg-neutral-100 py-2.5 text-sm font-bold text-neutral-600 transition hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 rounded-xl bg-emerald-500 py-2.5 text-sm font-bold text-neutral-950 transition hover:bg-emerald-400"
+                  disabled={saving}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-500 py-2.5 text-sm font-bold text-neutral-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Save Team
+                  {saving ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Saving to database...
+                    </>
+                  ) : (
+                    'Save Team'
+                  )}
                 </button>
               </div>
             </form>

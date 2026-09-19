@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Player, PlayerRole } from '../../types';
-import { Search, Plus, User, Edit2, Trash2, Award } from 'lucide-react';
+import { Search, Plus, User, Edit2, Trash2, Award, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface PlayersViewProps {
   players: Player[];
   teams: { name: string; playerIds: string[] }[];
   isAdmin?: boolean;
-  onAddPlayer: (player: Omit<Player, 'id' | 'stats'>) => void;
-  onEditPlayer: (id: string, player: Omit<Player, 'id' | 'stats'>) => void;
+  onAddPlayer: (player: Omit<Player, 'id' | 'stats'>) => Promise<boolean>;
+  onEditPlayer: (id: string, player: Omit<Player, 'id' | 'stats'>) => Promise<boolean>;
   onDeletePlayer: (id: string) => void;
   onSelectPlayer: (id: string) => void;
 }
@@ -25,6 +25,7 @@ export default function PlayersView({
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
+  const [saving, setSaving] = useState(false);
 
   // Form states
   const [name, setName] = useState('');
@@ -59,9 +60,9 @@ export default function PlayersView({
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim() || saving) return;
 
     const playerData = {
       name: name.trim(),
@@ -70,12 +71,12 @@ export default function PlayersView({
       age: age === '' ? undefined : Number(age),
     };
 
-    if (editingPlayer) {
-      onEditPlayer(editingPlayer.id, playerData);
-    } else {
-      onAddPlayer(playerData);
-    }
-    setIsModalOpen(false);
+    setSaving(true);
+    const ok = editingPlayer
+      ? await onEditPlayer(editingPlayer.id, playerData)
+      : await onAddPlayer(playerData);
+    setSaving(false);
+    if (ok) setIsModalOpen(false);
   };
 
   return (
@@ -191,8 +192,9 @@ export default function PlayersView({
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
+                disabled={saving}
                 aria-label="Close dialog"
-                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-neutral-50 text-neutral-400 transition hover:bg-neutral-100 active:scale-95"
+                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-neutral-50 text-neutral-400 transition hover:bg-neutral-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Plus size={16} className="rotate-45" />
               </button>
@@ -264,15 +266,24 @@ export default function PlayersView({
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 rounded-xl bg-neutral-100 py-2.5 min-h-[44px] text-sm font-bold text-neutral-600 transition hover:bg-neutral-200 active:scale-95"
+                  disabled={saving}
+                  className="flex-1 rounded-xl bg-neutral-100 py-2.5 min-h-[44px] text-sm font-bold text-neutral-600 transition hover:bg-neutral-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 rounded-xl bg-emerald-500 py-2.5 min-h-[44px] text-sm font-bold text-neutral-950 transition hover:bg-emerald-400 active:scale-95"
+                  disabled={saving}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-500 py-2.5 min-h-[44px] text-sm font-bold text-neutral-950 transition hover:bg-emerald-400 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Save Profile
+                  {saving ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Saving to database...
+                    </>
+                  ) : (
+                    'Save Profile'
+                  )}
                 </button>
               </div>
             </form>

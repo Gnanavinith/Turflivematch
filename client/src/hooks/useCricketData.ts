@@ -61,6 +61,7 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
   const pendingSyncRef = useRef<Map<string, Match>>(new Map());
   const syncingRef = useRef<Set<string>>(new Set());
   const lastLocalSyncRef = useRef<Record<string, number>>({});
+  const syncWarnedRef = useRef<Set<string>>(new Set());
 
   const persistPending = () => {
     try { safeStorage.setItem(PENDING_KEY, JSON.stringify(Array.from(pendingSyncRef.current.entries()))); }
@@ -108,12 +109,17 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
         pendingSyncRef.current.delete(id);
         persistPending();
       }
+      syncWarnedRef.current.delete(id);
     } catch (err) {
       console.error('Match sync failed (will retry):', err);
+      if (!syncWarnedRef.current.has(id)) {
+        syncWarnedRef.current.add(id);
+        triggerToast('Connection issue — changes saved on this device. Retrying database sync...', 'warn');
+      }
     } finally {
       syncingRef.current.delete(id);
     }
-  }, []);
+  }, [triggerToast]);
 
   const proxyMatches = (incoming: Match[]) => {
     setMatches(prev => {
@@ -170,29 +176,33 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
     return () => { active = false; clearTimeout(hydrationFallback); clearInterval(pollInterval); };
   }, [attemptSync]);
 
-  const handleAddPlayer = useCallback(async (pData: Omit<Player, 'id' | 'stats'>) => {
+  const handleAddPlayer = useCallback(async (pData: Omit<Player, 'id' | 'stats'>): Promise<boolean> => {
     const newPlayer: Player = { ...pData, id: uid(), stats: { matches: 0, runs: 0, balls: 0, wickets: 0, fifties: 0, hundreds: 0, fours: 0, sixes: 0 } };
     try {
       await savePlayer(newPlayer);
       syncPlayers([...players, newPlayer]);
       triggerToast(`Added player "${pData.name}" to the database`);
+      return true;
     } catch (err) {
       console.error('Error saving new player:', err);
       triggerToast(`Could not save "${pData.name}" to the database. Please try again.`, 'warn');
+      return false;
     }
   }, [players, triggerToast]);
 
-  const handleEditPlayer = useCallback(async (id: string, pData: Omit<Player, 'id' | 'stats'>) => {
+  const handleEditPlayer = useCallback(async (id: string, pData: Omit<Player, 'id' | 'stats'>): Promise<boolean> => {
     const original = players.find(p => p.id === id);
-    if (!original) return;
+    if (!original) return false;
     const updatedPlayer = { ...original, ...pData };
     try {
       await savePlayer(updatedPlayer);
       syncPlayers(players.map(p => (p.id === id ? updatedPlayer : p)));
       triggerToast(`Updated profile for "${pData.name}"`);
+      return true;
     } catch (err) {
       console.error('Error updating player:', err);
       triggerToast(`Could not update "${pData.name}". Please try again.`, 'warn');
+      return false;
     }
   }, [players, triggerToast]);
 
@@ -208,29 +218,33 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
     }
   }, [players, triggerToast]);
 
-  const handleAddTeam = useCallback(async (tData: Omit<Team, 'id'>) => {
+  const handleAddTeam = useCallback(async (tData: Omit<Team, 'id'>): Promise<boolean> => {
     const newTeam: Team = { ...tData, id: uid() };
     try {
       await saveTeam(newTeam);
       syncTeams([...teams, newTeam]);
       triggerToast(`Created team "${tData.name}" in the database`);
+      return true;
     } catch (err) {
       console.error('Error saving new team:', err);
       triggerToast(`Could not create team "${tData.name}". Please try again.`, 'warn');
+      return false;
     }
   }, [teams, triggerToast]);
 
-  const handleEditTeam = useCallback(async (id: string, tData: Omit<Team, 'id'>) => {
+  const handleEditTeam = useCallback(async (id: string, tData: Omit<Team, 'id'>): Promise<boolean> => {
     const original = teams.find(t => t.id === id);
-    if (!original) return;
+    if (!original) return false;
     const updatedTeam = { ...original, ...tData };
     try {
       await saveTeam(updatedTeam);
       syncTeams(teams.map(t => (t.id === id ? updatedTeam : t)));
       triggerToast(`Updated roster for "${tData.name}"`);
+      return true;
     } catch (err) {
       console.error('Error updating team:', err);
       triggerToast(`Could not update "${tData.name}". Please try again.`, 'warn');
+      return false;
     }
   }, [teams, triggerToast]);
 
@@ -248,9 +262,16 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
 
   const handleDeleteMatch = useCallback(async (id: string) => {
     const target = matches.find(m => m.id === id);
-    syncMatches(matches.filter(m => m.id !== id));
-    try { await removeMatch(id); } catch (err) { console.error('Error removing match:', err); }
-    triggerToast(`Deleted match: ${target?.team1Name} vs ${target?.team2Name}`, 'warn');
+    try {
+      await removeMatch(id);
+      pendingSyncRef.current.delete(id);
+      persistPending();
+      syncMatches(matches.filter(m => m.id !== id));
+      triggerToast(`Deleted match: ${target?.team1Name} vs ${target?.team2Name}`, 'warn');
+    } catch (err) {
+      console.error('Error removing match:', err);
+      triggerToast('Could not delete the match from the database. Please try again.', 'warn');
+    }
   }, [matches, triggerToast]);
 
   const handleStartMatch = useCallback(async (config: {
