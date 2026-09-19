@@ -172,48 +172,78 @@ export function useCricketData(triggerToast: (message: string, type?: 'success' 
 
   const handleAddPlayer = useCallback(async (pData: Omit<Player, 'id' | 'stats'>) => {
     const newPlayer: Player = { ...pData, id: uid(), stats: { matches: 0, runs: 0, balls: 0, wickets: 0, fifties: 0, hundreds: 0, fours: 0, sixes: 0 } };
-    syncPlayers([...players, newPlayer]);
-    try { await savePlayer(newPlayer); } catch (err) { console.error('Error saving new player:', err); }
-    triggerToast(`Added player "${pData.name}"`);
+    try {
+      await savePlayer(newPlayer);
+      syncPlayers([...players, newPlayer]);
+      triggerToast(`Added player "${pData.name}" to the database`);
+    } catch (err) {
+      console.error('Error saving new player:', err);
+      triggerToast(`Could not save "${pData.name}" to the database. Please try again.`, 'warn');
+    }
   }, [players, triggerToast]);
 
   const handleEditPlayer = useCallback(async (id: string, pData: Omit<Player, 'id' | 'stats'>) => {
     const original = players.find(p => p.id === id);
     if (!original) return;
     const updatedPlayer = { ...original, ...pData };
-    syncPlayers(players.map(p => (p.id === id ? updatedPlayer : p)));
-    try { await savePlayer(updatedPlayer); } catch (err) { console.error('Error updating player:', err); }
-    triggerToast(`Updated profile for "${pData.name}"`);
+    try {
+      await savePlayer(updatedPlayer);
+      syncPlayers(players.map(p => (p.id === id ? updatedPlayer : p)));
+      triggerToast(`Updated profile for "${pData.name}"`);
+    } catch (err) {
+      console.error('Error updating player:', err);
+      triggerToast(`Could not update "${pData.name}". Please try again.`, 'warn');
+    }
   }, [players, triggerToast]);
 
   const handleDeletePlayer = useCallback(async (id: string) => {
     const target = players.find(p => p.id === id);
-    syncPlayers(players.filter(p => p.id !== id));
-    try { await removePlayer(id); } catch (err) { console.error('Error removing player:', err); }
-    triggerToast(`Removed player "${target?.name || ''}"`, 'warn');
+    try {
+      await removePlayer(id);
+      syncPlayers(players.filter(p => p.id !== id));
+      triggerToast(`Removed player "${target?.name || ''}" from the database`, 'warn');
+    } catch (err) {
+      console.error('Error removing player:', err);
+      triggerToast(`Could not remove "${target?.name || 'player'}". Please try again.`, 'warn');
+    }
   }, [players, triggerToast]);
 
   const handleAddTeam = useCallback(async (tData: Omit<Team, 'id'>) => {
     const newTeam: Team = { ...tData, id: uid() };
-    syncTeams([...teams, newTeam]);
-    try { await saveTeam(newTeam); } catch (err) { console.error('Error saving new team:', err); }
-    triggerToast(`Created team "${tData.name}"`);
+    try {
+      await saveTeam(newTeam);
+      syncTeams([...teams, newTeam]);
+      triggerToast(`Created team "${tData.name}" in the database`);
+    } catch (err) {
+      console.error('Error saving new team:', err);
+      triggerToast(`Could not create team "${tData.name}". Please try again.`, 'warn');
+    }
   }, [teams, triggerToast]);
 
   const handleEditTeam = useCallback(async (id: string, tData: Omit<Team, 'id'>) => {
     const original = teams.find(t => t.id === id);
     if (!original) return;
     const updatedTeam = { ...original, ...tData };
-    syncTeams(teams.map(t => (t.id === id ? updatedTeam : t)));
-    try { await saveTeam(updatedTeam); } catch (err) { console.error('Error updating team:', err); }
-    triggerToast(`Updated roster for "${tData.name}"`);
+    try {
+      await saveTeam(updatedTeam);
+      syncTeams(teams.map(t => (t.id === id ? updatedTeam : t)));
+      triggerToast(`Updated roster for "${tData.name}"`);
+    } catch (err) {
+      console.error('Error updating team:', err);
+      triggerToast(`Could not update "${tData.name}". Please try again.`, 'warn');
+    }
   }, [teams, triggerToast]);
 
   const handleDeleteTeam = useCallback(async (id: string) => {
     const target = teams.find(t => t.id === id);
-    syncTeams(teams.filter(t => t.id !== id));
-    try { await removeTeam(id); } catch (err) { console.error('Error removing team:', err); }
-    triggerToast(`Disbanded team "${target?.name || ''}"`, 'warn');
+    try {
+      await removeTeam(id);
+      syncTeams(teams.filter(t => t.id !== id));
+      triggerToast(`Disbanded team "${target?.name || ''}"`, 'warn');
+    } catch (err) {
+      console.error('Error removing team:', err);
+      triggerToast(`Could not disband "${target?.name || 'team'}". Please try again.`, 'warn');
+    }
   }, [teams, triggerToast]);
 
   const handleDeleteMatch = useCallback(async (id: string) => {
